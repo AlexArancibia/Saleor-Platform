@@ -47,7 +47,7 @@ services:
   redis:
     image: library/redis:7.0-alpine
     ports:
-      - 6379:6379
+      - 5432:5432
     restart: unless-stopped
     networks:
       - saleor-backend-tier
