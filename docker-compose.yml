@@ -1,30 +1,79 @@
+version: "3.4"
+
 services:
   api:
     image: ghcr.io/saleor/saleor:3.20
     ports:
-      - 8001:8001
+      - 8000:8000
     restart: unless-stopped
     networks:
       - saleor-backend-tier
     stdin_open: true
     tty: true
     depends_on:
+      - db
+      - redis
       - jaeger
     volumes:
+      # shared volume between worker and api for media
       - saleor-media:/app/media
     env_file:
       - common.env
-      - backend.env  # Cargar las variables de backend.env
+      - backend.env
     environment:
       - JAEGER_AGENT_HOST=jaeger
       - DASHBOARD_URL=http://localhost:9000/
-      - ALLOWED_HOSTS=localhost,api
+      - ALLOWED_HOSTS=api.vps1.emetstudio.com,localhost,api
 
   dashboard:
     image: ghcr.io/saleor/saleor-dashboard:latest
     ports:
       - 9000:80
     restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    environment:
+      - ALLOWED_HOSTS=dashboard.vps1.emetstudio.com,localhost,dashboard
+
+  db:
+    image: library/postgres:15-alpine
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - saleor-db:/var/lib/postgresql/data
+      - ./replica_user.sql:/docker-entrypoint-initdb.d/replica_user.sql
+    environment:
+      - POSTGRES_USER=saleor
+      - POSTGRES_PASSWORD=saleor
+
+  redis:
+    image: library/redis:7.0-alpine
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - saleor-redis:/data
+
+  worker:
+    image: ghcr.io/saleor/saleor:3.20
+    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    env_file:
+      - common.env
+      - backend.env
+    depends_on:
+      - redis
+      - mailpit
+    volumes:
+      # shared volume between worker and api for media
+      - saleor-media:/app/media
 
   jaeger:
     image: jaegertracing/all-in-one
@@ -43,20 +92,6 @@ services:
       - type: tmpfs
         target: /tmp
 
-  worker:
-    image: ghcr.io/saleor/saleor:3.20
-    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
-    restart: unless-stopped
-    networks:
-      - saleor-backend-tier
-    env_file:
-      - common.env
-      - backend.env  # Cargar las variables de backend.env
-    depends_on:
-      - mailpit
-    volumes:
-      - saleor-media:/app/media
-
   mailpit:
     image: axllent/mailpit
     ports:
@@ -68,6 +103,8 @@ services:
 
 volumes:
   saleor-db:
+    driver: local
+  saleor-redis:
     driver: local
   saleor-media:
 
