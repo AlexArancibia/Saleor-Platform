@@ -56,7 +56,6 @@ services:
       - common.env
       - backend.env
     depends_on:
-      - redis
       - mailpit
     volumes:
       # shared volume between worker and api for media
