@@ -23,6 +23,8 @@ services:
       - JAEGER_AGENT_HOST=jaeger
       - DASHBOARD_URL=http://localhost:9000/
       - ALLOWED_HOSTS=localhost,api
+  
+
 
   dashboard:
     image: ghcr.io/saleor/saleor-dashboard:latest
@@ -44,15 +46,7 @@ services:
       - POSTGRES_USER=saleor
       - POSTGRES_PASSWORD=saleor
 
-  redis:
-    image: library/redis:7.0-alpine
-    ports:
-      - 6379:6379
-    restart: unless-stopped
-    networks:
-      - saleor-backend-tier
-    volumes:
-      - saleor-redis:/data
+ 
 
   worker:
     image: ghcr.io/saleor/saleor:3.20
