@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ![Saleor Platform](https://user-images.githubusercontent.com/249912/71523206-4e45f800-28c8-11ea-84ba-345a9bfc998a.png)
 
 <div align="center">
@@ -171,3 +172,6 @@ Some situations do call for extra code; we can cover exotic use cases or build y
 #### Crafted with ❤️ by [Saleor Commerce](https://saleor.io/)
 
 hello@saleor.io
+=======
+# Saleor-Platform
+>>>>>>> fd3454d1d46f849a3ff6d5f9426278d9a6ff6d42
