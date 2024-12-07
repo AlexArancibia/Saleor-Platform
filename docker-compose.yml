@@ -33,7 +33,7 @@ services:
   db:
     image: library/postgres:15-alpine
     ports:
-      - 6543:6543
+      - 5432:5432
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -47,7 +47,7 @@ services:
   redis:
     image: library/redis:7.0-alpine
     ports:
-      - 5432:5432
+      - 6379:6379
     restart: unless-stopped
     networks:
       - saleor-backend-tier
